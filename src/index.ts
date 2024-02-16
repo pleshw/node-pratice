@@ -1,5 +1,5 @@
-import { AppDataSource } from "./data-source"
-import { User } from "./entity/User"
+import { AppDataSource } from "./database/data-source"
+import { User } from "./database/entities/User"
 import express from "express"
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocument from './swagger.json';
@@ -13,10 +13,10 @@ app.use( express.json() )
 
 AppDataSource.initialize()
     .then( () => {
-        console.log( "Data Source has been initialized!" )
+        console.log( "Data Source has been initialized!" );
     } )
     .catch( ( err ) => {
-        console.error( "Error during Data Source initialization:", err )
+        console.error( "Error during Data Source initialization:", err );
     } );
 
 app.use( '/api-docs', swaggerUi.serve, swaggerUi.setup( swaggerDocument ) );

@@ -7,10 +7,9 @@
       "test": "jest",
       "start": "ts-node src/index.ts",
       "start:dev": "npx nodemon",
-      "build": "rimraf ./dist && tsc",
-      "typeorm": "typeorm-ts-node-commonjs",
+      "typeorm": "typeorm-ts-node-commonjs --dataSource ./src/database/data-source.ts",
       "typeorm:runMigrations": "npm run typeorm migration:run",
-      "typeorm:generateMigration": "npm run typeorm migration:generate ./src/db/migrations/Migration --timestamp"
+      "typeorm:generateMigration": "npm run typeorm migration:generate ./src/database/migrations/Migration --timestamp"
    },
    "keywords": [],
    "author": "",
