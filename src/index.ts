@@ -1,28 +1,61 @@
 import { AppDataSource } from "./data-source"
 import { User } from "./entity/User"
-
-import express, { Express, Request, Response, Application } from 'express';
+import express from "express"
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocument from './swagger.json';
+import { Request, Response } from "express"
 
-import * as dotenv from 'dotenv';
+// create and setup express app
+const app = express()
+const port = process.env.PORT || 8000;
+app.use( express.json() )
+
 
 AppDataSource.initialize()
-  .then( () => {
-
-    dotenv.config();
-
-    const app: Application = express();
-    const port = process.env.PORT || 8000;
-    app.use( '/api-docs', swaggerUi.serve, swaggerUi.setup( swaggerDocument ) );
-
-    app.get( '/', async ( req: Request, res: Response ) => {
-      res.send( `Welcome to Express & TypeScript Server ${ ( await User.findOneBy( { id: 1 } ) ).firstName }` );
+    .then( () => {
+        console.log( "Data Source has been initialized!" )
+    } )
+    .catch( ( err ) => {
+        console.error( "Error during Data Source initialization:", err )
     } );
 
-    app.listen( port, () => {
-      console.log( `Server is Fire at http://localhost:${ port }` );
+app.use( '/api-docs', swaggerUi.serve, swaggerUi.setup( swaggerDocument ) );
+
+app.get( "/users", async function ( req: Request, res: Response ) {
+    const users = await AppDataSource.getRepository( User ).find();
+    res.json( users );
+} )
+
+app.get( "/users/:id", async function ( req: Request, res: Response ) {
+    const results = await AppDataSource.getRepository( User ).findOneBy( {
+        id: +req.params.id,
     } );
-  } )
-  .catch( ( error ) => console.log( error ) )
+
+    return res.send( results );
+} )
+
+app.post( "/users", async function ( req: Request, res: Response ) {
+    const user = AppDataSource.getRepository( User ).create( req.body );
+    const results = await AppDataSource.getRepository( User ).save( user );
+    return res.send( results );
+} )
+
+app.put( "/users/:id", async function ( req: Request, res: Response ) {
+    const user = await AppDataSource.getRepository( User ).findOneBy( {
+        id: +req.params.id,
+    } );
+
+    AppDataSource.getRepository( User ).merge( user, req.body );
+    const results = await AppDataSource.getRepository( User ).save( user );
+    return res.send( results );
+} )
+
+app.delete( "/users/:id", async function ( req: Request, res: Response ) {
+    const results = await AppDataSource.getRepository( User ).delete( +req.params.id );
+    return res.send( results );
+} )
+
+app.listen( port, () => {
+    console.log( `Server is Fire at http://localhost:${ port }` );
+} );
 
